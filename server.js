@@ -3,6 +3,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+// Setup empty JS object to act as endpoint for all routes
+projectData = {};
+
 // Start up an instance of app
 const app = express();
 
@@ -25,20 +28,19 @@ function listening() {
     console.log(`Running server on port: ${port}`);
 };
 
-// Setup empty JS object to act as endpoint for all routes
-projectData = {};
+
 
 //Get Requests
 
 app.get("/retrieveData", (req, res) => {
     console.log("Getting project data");
-    res.send(projectData);
+    res.send(JSON.stringify(projectData));
 })
 
 //Post Request 
 
 app.post('/appendData', (req, res) => {
-    console.log(`Body: ${req.body}`);
+    console.log(`Body: ${JSON.stringify(req.body)}`);
     projectData = req.body;
     res.send(projectData);
 });
