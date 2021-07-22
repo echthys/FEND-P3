@@ -11,22 +11,29 @@ let d = new Date();
 let newDate = d.getMonth() + 1 + '.' + d.getDate() + '.' + d.getFullYear();
 
 // Event listener to add function to existing HTML DOM element
+document.getElementById('generate').addEventListener('click', getWeatherValues);
 
-// document.getElementById('generate').addEventListener('click', generateWeather);
 
 /* Function called by event listener */
 
+async function getWeatherValues() {
+    const zip = document.getElementById('zip').value;
+    const feelings = document.getElementById('feelings').value;
+    getApiData(baseURL, zip, apiKey)
+        .then((data) => {
+            postReq("/appendData", { date: newDate, temp: data.main.temp, feeling: feelings });
+        })
+        .then(insertData)
+}
 
 
 /* Function to GET Web API Data*/
 
-async function GetApiData(baseURL, zip, apiKey) {
-    console.log(baseURL + zip + apiKey);
+async function getApiData(baseURL, zip, apiKey) {
     const apiRes = await fetch(baseURL + zip + apiKey);
     try {
-        const weatherData = await apiRes.json();
-        console.log(weatherData);
-        return weatherData;
+        const data = await apiRes.json();
+        return data;
         // handle error
     } catch (error) {
         console.log('error', error);
@@ -34,6 +41,42 @@ async function GetApiData(baseURL, zip, apiKey) {
 }
 
 /* Function to POST data */
-
+const postReq = async (url = '', data = {}) => {
+    const res = await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+    try {
+        const updatedData = await res.json();
+        return updatedData;
+    } catch (error) {
+        console.log('error', error);
+    };
+}
 
 /* Function to GET Project Data */
+
+const getReq = async (url = '') => {
+    const request = await fetch(url);
+    try {
+        const projData = await request.json();
+        return projData;
+    }
+    catch (error) {
+        console.log('error', error);
+    }
+};
+
+async function insertData() {
+    const data = await getReq("/retrieveData")
+        .then(function (projData) {
+            console.log(projData.temp);
+            document.getElementById('date').innerHTML = projData.date;
+            document.getElementById('temp').innerHTML = projData.temp;
+            document.getElementById('content').innerHTML = projData.feeling;
+        })
+}
